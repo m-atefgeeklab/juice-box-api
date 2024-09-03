@@ -107,10 +107,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       index: true, // Indexing for quick lookup with Google auth
     },
-    appleId: {
-      type: String,
-      index: true, // Indexing for quick lookup with Apple auth
-    },
     stripeCustomerId: {
       type: String,
       index: true, // Indexing for quick lookup with Stripe
