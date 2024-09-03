@@ -49,24 +49,6 @@ router.get(
   }
 );
 
-// Apple auth routes
-router.get("/apple", passport.authenticate("apple"));
-
-router.post(
-  "/apple/callback",
-  passport.authenticate("apple", { failureRedirect: "/login" }),
-  (req, res) => {
-    try {
-      const token = createToken(req.user._id);
-      res.redirect(`/api/v1/auth/success?token=${token}`);
-    } catch (err) {
-      res
-        .status(500)
-        .json({ message: "Authentication failed", error: err.message });
-    }
-  }
-);
-
 // Success route
 router.get("/success", (req, res) => {
   res.json({
