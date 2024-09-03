@@ -63,7 +63,8 @@ app.use(
   session({
     secret: process.env.COOKIE_SESSION_SECRET,
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: false, // Consider false if you don't want to save uninitialized sessions
+    cookie: { secure: process.env.NODE_ENV === "production" }, // Adjust based on your environment
   })
 );
 
