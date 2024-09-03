@@ -1,6 +1,7 @@
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("../models/userModel");
+const ApiError = require("../utils/apiError");
 
 // Configure Google Strategy
 passport.use(
@@ -9,17 +10,14 @@ passport.use(
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: "/api/v1/auth/google/callback",
-      proxy: true
+      proxy: true,
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
         let user = await User.findOne({ googleId: profile.id });
         if (user) {
-          // User exists, update email verification status
-          user.verifyEmail = true;
-          await user.save();
-
-          return done(null, user);
+          // if User in the database is already exists
+          throw new ApiError("User already exists, please login", 400);
         }
 
         // Create a new user if not found
