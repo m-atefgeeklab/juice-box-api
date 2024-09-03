@@ -6,9 +6,9 @@ const morgan = require("morgan");
 const cors = require("cors");
 const cloudinary = require("cloudinary").v2;
 const compression = require("compression");
-const cookieSession = require('cookie-session');
+const session = require("express-session");
 // const bodyParser = require("body-parser");
-// const cookieParser = require("cookie-parser");
+const cookieParser = require("cookie-parser");
 const passport = require("passport");
 const helmet = require("helmet");
 const hpp = require("hpp");
@@ -56,13 +56,14 @@ app.post(
 app.use(express.json({ limit: "20kb" }));
 
 // Parse cookies
-// app.use(cookieParser()); // For parsing cookies
+app.use(cookieParser()); // For parsing cookies
 
+// Initialize session middleware
 app.use(
-  cookieSession({
-    // 30 days 24 hours 60 minutes 60 seconds 1000 milliseconds for one second 
-    maxAge: 30 * 24 * 60 * 60 * 1000,
-    keys: process.env.COOKIE_SESSION_SECRET,
+  session({
+    secret: process.env.COOKIE_SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
   })
 );
 

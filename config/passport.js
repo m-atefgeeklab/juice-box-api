@@ -1,7 +1,6 @@
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("../models/userModel");
-const capitalizeFirstLetter = require("../helpers/capitalizeFirstLetter");
 
 // Configure Google Strategy
 passport.use(
