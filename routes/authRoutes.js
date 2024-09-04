@@ -39,15 +39,7 @@ router.get("/google/callback", passport.authenticate("google"), (req, res) => {
 });
 
 router.get("/user", (req, res) => {
-  // Check if req.user exists
-  if (req.user) {
-    res.send(req.user);
-  } else {
-    // If req.user doesn't exist, send an appropriate response
-    res.status(401).send({
-      message: "User not authenticated",
-    });
-  }
+  res.send(req.user);
 });
 
 router.get("/logout", (req, res) => {
