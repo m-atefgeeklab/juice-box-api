@@ -51,12 +51,15 @@ router.get(
 
 // Success route
 router.get("/success", (req, res) => {
-  res.json({
-    message: "User logged in successfully!",
-    // password: "MyPassword$1",
-    token: req.query.token,
-    // user: req.user,
-  });
+  const token = req.query.token;
+  if (token) {
+    res.json({
+      message: "User logged in successfully!",
+      token: token,
+    });
+  } else {
+    res.status(400).json({ message: "No token found" });
+  }
 });
 
 // Logout route
