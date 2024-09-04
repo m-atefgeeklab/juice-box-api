@@ -28,26 +28,28 @@ router.post("/webhook/verify-email", verifyEmailWebhook);
 
 // Google auth routes
 router.get(
-  "/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
+  '/google', 
+  passport.authenticate('google', {
+    scope: ['profile', 'email']
   })
 );
 
-// Google OAuth callback route
-router.get("/google/callback", passport.authenticate("google"), (req, res) => {
-  res.redirect("http://localhost:3000");
+router.get(
+  '/google/callback', 
+  passport.authenticate('google'),
+  (req, res) => {
+    res.redirect('https://localhost:3000/');
+  }
+);
+
+router.get('/logout', (req, res) => {
+  req.logout();
+  res.redirect('/');
 });
 
-// Logout route 
-router.get("/user", (req, res) => {
+router.get('/user', (req, res) => {
   res.send(req.user);
 });
 
-// Logout route
-router.get("/logout", (req, res) => {
-  req.logout();
-  res.redirect("/");
-});
 
 module.exports = router;
