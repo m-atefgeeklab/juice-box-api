@@ -1,9 +1,7 @@
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("../models/userModel");
-const ApiError = require("../utils/apiError");
 
-// Configure Google Strategy
 passport.use(
   new GoogleStrategy(
     {
@@ -16,11 +14,9 @@ passport.use(
       try {
         let user = await User.findOne({ googleId: profile.id });
         if (user) {
-          // if User in the database is already exists
-          throw new ApiError("User already exists, please login", 400);
+          return done(null, user);
         }
 
-        // Create a new user if not found
         const newUser = new User({
           googleId: profile.id,
           name: profile.name.givenName,
@@ -31,7 +27,6 @@ passport.use(
         });
 
         await newUser.save();
-
         done(null, newUser);
       } catch (err) {
         done(err);
@@ -40,12 +35,10 @@ passport.use(
   )
 );
 
-// Serialize user
 passport.serializeUser((user, done) => {
   done(null, user._id);
 });
 
-// Deserialize user
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await User.findById(id);

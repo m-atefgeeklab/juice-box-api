@@ -28,48 +28,28 @@ router.post("/webhook/verify-email", verifyEmailWebhook);
 
 // Google auth routes
 router.get(
-  "/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
+  '/google', 
+  passport.authenticate('google', {
+    scope: ['profile', 'email']
   })
 );
 
 router.get(
-  "/google/callback",
-  passport.authenticate("google", { failureRedirect: "/login" }),
+  '/google/callback', 
+  passport.authenticate('google'),
   (req, res) => {
-    try {
-      const token = createToken(req.user._id);
-      res.redirect(`/api/v1/auth/success?token=${token}`);
-    } catch (err) {
-      res
-        .status(500)
-        .json({ message: "Authentication failed", error: err.message });
-    }
+    res.redirect('/');
   }
 );
 
-// Success route
-router.get("/success", (req, res) => {
-  const token = req.query.token;
-  if (token) {
-    res.json({
-      message: "User logged in successfully!",
-      token: token,
-    });
-  } else {
-    res.status(400).json({ message: "No token found" });
-  }
+router.get('/user', (req, res) => {
+  const token = createToken(req.user._id);
+  res.json({ user: req.user, token });
 });
 
-// Logout route
-router.get("/logout", (req, res) => {
-  req.logout((err) => {
-    if (err) {
-      return next(err);
-    }
-    res.json({ message: "Logged out successfully" });
-  });
+router.get('/logout', (req, res) => {
+  req.logout();
+  res.redirect('/');
 });
 
 module.exports = router;

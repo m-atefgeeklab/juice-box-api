@@ -6,9 +6,11 @@ const morgan = require("morgan");
 const cors = require("cors");
 const cloudinary = require("cloudinary").v2;
 const compression = require("compression");
-const session = require("express-session");
-// const bodyParser = require("body-parser");
-const cookieParser = require("cookie-parser");
+// const session = require("express-session");
+// const MongoStore = require("connect-mongo");
+const bodyParser = require("body-parser");
+const cookieSession = require('cookie-session');
+// const cookieParser = require("cookie-parser");
 const passport = require("passport");
 const helmet = require("helmet");
 const hpp = require("hpp");
@@ -20,11 +22,11 @@ const ApiError = require("./utils/apiError");
 const globalError = require("./middlewares/errorMiddleware");
 const dbConnection = require("./config/database");
 
-// Routes
-const mountRoutes = require("./routes");
-
 // Passport
 require("./config/passport");
+
+// Routes
+const mountRoutes = require("./routes");
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -39,8 +41,13 @@ dbConnection();
 const app = express();
 
 // Enable other domains to access your application
-app.use(cors());
-app.options("*", cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    credentials: true,
+  })
+);
 
 // Compress all responses
 app.use(compression());
@@ -52,19 +59,14 @@ app.post(
   stripeWebhook
 );
 
-// Parse JSON requests and URL-encoded data
-app.use(express.json({ limit: "20kb" }));
+app.use(bodyParser.json());
+// app.use(express.json({ limit: "20kb" }));
 
-// Parse cookies
-app.use(cookieParser()); // For parsing cookies
-
-// Initialize session middleware
 app.use(
-  session({
-    secret: process.env.COOKIE_SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false, // Consider false if you don't want to save uninitialized sessions
-    cookie: { secure: process.env.NODE_ENV === "production" }, // Adjust based on your environment
+  cookieSession({
+    // 30 days 24 hours 60 minutes 60 seconds 1000 milliseconds for one second 
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+    keys: [process.env.COOKIE_SESSION_SECRET],
   })
 );
 
