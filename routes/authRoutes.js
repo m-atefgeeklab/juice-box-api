@@ -41,14 +41,7 @@ router.get("/google/callback", passport.authenticate("google"), (req, res) => {
 router.get("/user", (req, res) => {
   // Check if req.user exists
   if (req.user) {
-    // Generate the token using the user's ID
-    const token = createToken(req.user._id);
-
-    // Send the user data and token back to the client
-    res.send({
-      user: req.user,
-      token: token,
-    });
+    res.send(req.user);
   } else {
     // If req.user doesn't exist, send an appropriate response
     res.status(401).send({
