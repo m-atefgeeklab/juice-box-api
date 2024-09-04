@@ -34,14 +34,17 @@ router.get(
   })
 );
 
+// Google OAuth callback route
 router.get("/google/callback", passport.authenticate("google"), (req, res) => {
-  res.redirect("/");
+  res.redirect("http://localhost:3000");
 });
 
+// Logout route 
 router.get("/user", (req, res) => {
   res.send(req.user);
 });
 
+// Logout route
 router.get("/logout", (req, res) => {
   req.logout();
   res.redirect("/");
