@@ -35,23 +35,19 @@ router.get(
 );
 
 // Google OAuth callback route
-router.get(
-  '/google/callback', 
-  passport.authenticate('google'),
-  (req, res) => {
-    res.redirect('/');
-  }
-);
+router.get("/google/callback", passport.authenticate("google"), (req, res) => {
+  res.redirect("http://localhost:3000");
+});
 
-// Get current user
-router.get('/user', (req, res) => {
+// Logout route 
+router.get("/user", (req, res) => {
   res.send(req.user);
 });
 
-// Logout
-router.get('/logout', (req, res) => {
+// Logout route
+router.get("/logout", (req, res) => {
   req.logout();
-  res.redirect('/');
+  res.redirect("/");
 });
 
 module.exports = router;
