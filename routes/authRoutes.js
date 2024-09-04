@@ -35,10 +35,11 @@ router.get(
 );
 
 router.get(
-  '/google/callback', 
-  passport.authenticate('google'),
+  "/google/callback",
+  passport.authenticate("google", { failureRedirect: "http://localhost:3000/login" }), // Redirect to the login page on failure
   (req, res) => {
-    res.redirect('https://localhost:3000/');
+    // Successful authentication, redirect to the frontend app
+    res.redirect("http://localhost:3000"); // Replace with your frontend URL
   }
 );
 
@@ -50,6 +51,5 @@ router.get('/logout', (req, res) => {
 router.get('/user', (req, res) => {
   res.send(req.user);
 });
-
 
 module.exports = router;
