@@ -9,7 +9,7 @@ const compression = require("compression");
 // const session = require("express-session");
 // const MongoStore = require("connect-mongo");
 const bodyParser = require("body-parser");
-const cookieSession = require('cookie-session');
+const cookieSession = require("cookie-session");
 // const cookieParser = require("cookie-parser");
 const passport = require("passport");
 const helmet = require("helmet");
@@ -41,18 +41,15 @@ dbConnection();
 const app = express();
 
 // CORS Headers => Required for cross-origin/ cross-server communication
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
-  );
-  res.setHeader(
-    'Access-Control-Allow-Methods',
-    'GET, POST, PATCH, DELETE, OPTIONS'
-  );
-  next();
-});
+app.use(
+  cors({
+    origin: process.env.BASE_CLIENT_URL,
+    credentials: true,
+    methods: "GET, POST, PUT, DELETE, OPTIONS",
+    allowedHeaders:
+      "Content-Type, Authorization, Content-Length, X-Requested-With, Accept",
+  })
+);
 
 // Compress all responses
 app.use(compression());
@@ -69,7 +66,7 @@ app.use(bodyParser.json());
 
 app.use(
   cookieSession({
-    // 30 days 24 hours 60 minutes 60 seconds 1000 milliseconds for one second 
+    // 30 days 24 hours 60 minutes 60 seconds 1000 milliseconds for one second
     maxAge: 30 * 24 * 60 * 60 * 1000,
     keys: [process.env.COOKIE_SESSION_SECRET],
   })
