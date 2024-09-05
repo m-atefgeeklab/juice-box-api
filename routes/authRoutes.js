@@ -1,5 +1,4 @@
 const express = require("express");
-const passport = require("passport");
 const {
   signUpController,
   signInController,
@@ -8,6 +7,7 @@ const {
   resetPassword,
   verifyPassResetCode,
 } = require("../controllers/authController.js");
+const passport = require("passport");
 const {
   signupValidator,
   loginValidator,
@@ -28,28 +28,36 @@ router.post("/webhook/verify-email", verifyEmailWebhook);
 
 // Google auth routes
 router.get(
-  '/google', 
-  passport.authenticate('google', {
-    scope: ['profile', 'email']
+  "/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
   })
 );
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", { failureRedirect: "http://localhost:3000/login" }), // Redirect to the login page on failure
+  passport.authenticate("google", {
+    failureRedirect: "http://localhost:3000/login",
+  }), // Redirect to the login page on failure
   (req, res) => {
     // Successful authentication, redirect to the frontend app
     res.redirect("http://localhost:3000"); // Replace with your frontend URL
   }
 );
 
-router.get('/logout', (req, res) => {
+router.get("/logout", (req, res) => {
   req.logout();
-  res.redirect('/');
+  res.redirect("/");
 });
 
-router.get('/user', (req, res) => {
-  res.send(req.user);
+router.get("/user", (req, res) => {
+  if (req.user) {
+    // Create token
+    const token = createToken(req.user);
+    res.status(200).json({ message: "Login successful", token });
+  } else {
+    res.status(401).json({ message: "Unauthorized" });
+  }
 });
 
 module.exports = router;

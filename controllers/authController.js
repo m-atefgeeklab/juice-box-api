@@ -74,7 +74,7 @@ exports.signInController = catchError(
       return next(new ApiError("Invalid email or password", 401));
 
     // 2- Generate token
-    const token = createToken(user._id);
+    const token = createToken(user);
 
     res.status(200).json({ message: "Login successful", token });
   })
