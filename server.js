@@ -3,7 +3,7 @@ const path = require("path");
 const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
-const cors = require("cors");
+// const cors = require("cors");
 const cloudinary = require("cloudinary").v2;
 const compression = require("compression");
 // const session = require("express-session");
@@ -40,14 +40,19 @@ dbConnection();
 // Express app
 const app = express();
 
-// Enable other domains to access your application
-app.use(
-  cors({
-    origin: "https://client-seven-azure-83.vercel.app",
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    credentials: true,
-  })
-);
+// CORS Headers => Required for cross-origin/ cross-server communication
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+  );
+  res.setHeader(
+    'Access-Control-Allow-Methods',
+    'GET, POST, PATCH, DELETE, OPTIONS'
+  );
+  next();
+});
 
 // Compress all responses
 app.use(compression());
