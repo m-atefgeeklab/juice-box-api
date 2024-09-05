@@ -37,11 +37,11 @@ router.get(
 router.get(
   "/google/callback",
   passport.authenticate("google", {
-    failureRedirect: "http://localhost:3000/login",
+    failureRedirect: "https://client-seven-azure-83.vercel.app/login",
   }), // Redirect to the login page on failure
   (req, res) => {
     // Successful authentication, redirect to the frontend app
-    res.redirect("http://localhost:3000"); // Replace with your frontend URL
+    res.redirect("https://client-seven-azure-83.vercel.app"); // Replace with your frontend URL
   }
 );
 
