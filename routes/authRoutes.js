@@ -47,7 +47,7 @@ router.get(
 
 router.get("/logout", (req, res) => {
   req.logout();
-  res.redirect("/");
+  res.redirect(`${process.env.BASE_CLIENT_URL}`);
 });
 
 router.get("/user", (req, res) => {
