@@ -43,7 +43,7 @@ const app = express();
 // Enable other domains to access your application
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "https://client-seven-azure-83.vercel.app",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
   })
