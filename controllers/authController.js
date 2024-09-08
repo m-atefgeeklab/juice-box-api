@@ -80,6 +80,43 @@ exports.signInController = catchError(
   })
 );
 
+// @desc    Login with google
+// @route   POST /api/v1/auth/google
+// @access  Public
+exports.googleLogin = asyncHandler(async (req, res, next) => {
+  const { sub, name, picture, email, email_verified } = req.body;
+
+  if (!email_verified) {
+    return next(new ApiError("Email not verified", 400));
+  }
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    const newUser = await User.create({
+      name,
+      email,
+      avatar: picture,
+      googleId: sub,
+      verifyEmail: email_verified,
+    });
+
+    const token = createToken(newUser);
+
+    res.status(200).json({
+      message: "User created successfully",
+      token,
+    });
+  }
+
+  const token = createToken(user);
+
+  res.status(200).json({
+    message: "User logged in successfully",
+    token,
+  });
+});
+
 exports.verifyEmailController = catchError(
   asyncHandler(async (req, res, next) => {
     const { token } = req.params;

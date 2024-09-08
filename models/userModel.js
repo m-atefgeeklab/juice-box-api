@@ -2,6 +2,13 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const cron = require('node-cron');
 
+const notificationSchema = new mongoose.Schema({
+  serviceId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Service",
+  },
+});
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -21,8 +28,6 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
-      minlength: [8, "Password must be at least 8 characters long"],
     },
     phoneNumber: {
       type: String,
@@ -76,6 +81,7 @@ const userSchema = new mongoose.Schema(
       maxlength: [50, "Position must be less than 50 characters long"],
       trim: true,
     },
+    notifications: [notificationSchema],
     active: {
       type: Boolean,
       default: true,

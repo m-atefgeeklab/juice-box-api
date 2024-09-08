@@ -40,13 +40,11 @@ dbConnection();
 // Express app
 const app = express();
 
-app.use(cors(
-  {
-    origin: 'http://localhost:3000',
-    credentials: true
-  }
-))
-app.options('*', cors());
+// Cors
+app.use(cors());
+
+// Serve static files
+app.use(express.static(path.join(__dirname, "public")));
 
 // Compress all responses
 app.use(compression());
