@@ -86,10 +86,6 @@ exports.signInController = catchError(
 exports.googleLogin = asyncHandler(async (req, res, next) => {
   const { sub, name, picture, email, email_verified } = req.body;
 
-  if (!email_verified) {
-    return next(new ApiError("Email not verified", 400));
-  }
-
   const user = await User.findOne({ email });
 
   if (!user) {
