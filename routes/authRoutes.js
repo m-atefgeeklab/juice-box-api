@@ -15,7 +15,7 @@ const {
 } = require("../utils/validators/authValidator.js");
 const { verifyEmailWebhook } = require("../services/authService.js");
 const createToken = require("../utils/createToken");
-const validatorMiddleware = require('../../middlewares/validationMiddleware');
+const validatorMiddleware = require('../middlewares/validationMiddleware.js');
 
 const router = express.Router();
 
