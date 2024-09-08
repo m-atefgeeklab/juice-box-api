@@ -19,7 +19,7 @@ exports.signUpController = catchError(
 
     const existingUser = await User.findOne({ email });
     if (existingUser) return next(new ApiError("Email already exists", 400));
-    
+
     // Validate and format phone number
     const formattedPhoneNumber = formatPhoneNumber(ISD, phoneNumber);
 
@@ -84,14 +84,19 @@ exports.signInController = catchError(
 // @route   POST /api/v1/auth/google
 // @access  Public
 exports.googleLogin = asyncHandler(async (req, res, next) => {
-  const { sub, name, picture, email, email_verified } = req.body;
+  const { sub, given_name, family_name, picture, email, email_verified } =
+    req.body;
+
+  if (!email_verified) {
+    return next(new ApiError("Email not verified", 400));
+  }
 
   const user = await User.findOne({ email });
 
   if (!user) {
     const newUser = await User.create({
-      name,
-      email,
+      name: `${given_name} ${family_name}`,
+      email: email,
       avatar: picture,
       googleId: sub,
       verifyEmail: email_verified,

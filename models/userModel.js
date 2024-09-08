@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-const cron = require('node-cron');
+const cron = require("node-cron");
 
 const notificationSchema = new mongoose.Schema({
   serviceId: {
@@ -26,8 +26,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Email is required"],
       unique: true,
-      lowercase: true, // Ensure email is always stored in lowercase
-      trim: true,
       index: true, // Indexing email for uniqueness and quick lookups
     },
     password: {
@@ -110,9 +108,11 @@ const userSchema = new mongoose.Schema(
       default: false,
       index: true, // Index to quickly find verified/unverified users
     },
-    linkedCards: [{
-      stripeCardId: { type: String, index: true },  // Store Stripe Card ID
-    }],
+    linkedCards: [
+      {
+        stripeCardId: { type: String, index: true }, // Store Stripe Card ID
+      },
+    ],
     googleId: {
       type: String,
       index: true, // Indexing for quick lookup with Google auth
@@ -132,7 +132,7 @@ const userSchema = new mongoose.Schema(
     currency: {
       type: String,
       default: "USD",
-    }
+    },
   },
   {
     timestamps: true,
