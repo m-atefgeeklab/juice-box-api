@@ -104,7 +104,7 @@ exports.googleLogin = asyncHandler(async (req, res, next) => {
     const token = createToken(newUser);
 
     res.status(200).json({
-      message: "User created successfully",
+      message: "User signed up successfully",
       token,
     });
   }
