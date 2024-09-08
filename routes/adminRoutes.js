@@ -6,6 +6,7 @@ const {
   getAllServicesForUser,
   notifyUser,
   getAllUserNotifications,
+  seenNotification,
   deleteNotification,
   deleteService,
   deleteUser,
@@ -28,6 +29,7 @@ router.get("/get-all-users", getAllUsers);
 router.get("/get-all-user-notifications", getAllUserNotifications);
 router.post("/notify-user", notifyUser);
 router.delete("/delete-notification", deleteNotification);
+router.put("/seen-notification", seenNotification);
 router.get("/get-all-services-for-user", getAllServicesForUser);
 // router.get("/get-all-user-credits", getAllUserCredits);
 

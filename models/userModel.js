@@ -7,6 +7,10 @@ const notificationSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Service",
   },
+  seen: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const userSchema = new mongoose.Schema(
