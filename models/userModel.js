@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-const cron = require("node-cron");
+const cron = require('node-cron');
 
 const notificationSchema = new mongoose.Schema({
   serviceId: {
@@ -38,8 +38,12 @@ const userSchema = new mongoose.Schema(
       trim: true,
       sparse: true, // Index but allow nulls or missing values
     },
-    avatar: String,
-    avatarPublicId: String,
+    avatar: {
+      type: String,
+    },
+    s3Key: {
+      type: String,
+    },
     role: {
       type: String,
       enum: ["user", "admin"],
@@ -85,7 +89,6 @@ const userSchema = new mongoose.Schema(
       maxlength: [50, "Position must be less than 50 characters long"],
       trim: true,
     },
-    notifications: [notificationSchema],
     active: {
       type: Boolean,
       default: true,
@@ -110,11 +113,9 @@ const userSchema = new mongoose.Schema(
       default: false,
       index: true, // Index to quickly find verified/unverified users
     },
-    linkedCards: [
-      {
-        stripeCardId: { type: String, index: true }, // Store Stripe Card ID
-      },
-    ],
+    linkedCards: [{
+      stripeCardId: { type: String, index: true },  // Store Stripe Card ID
+    }],
     googleId: {
       type: String,
       index: true, // Indexing for quick lookup with Google auth
@@ -135,6 +136,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "USD",
     },
+    notifications: [notificationSchema],
   },
   {
     timestamps: true,

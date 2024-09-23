@@ -21,9 +21,8 @@ passport.use(
           googleId: profile.id,
           name: profile.name.givenName,
           email: profile.emails[0].value,
-          password: "MyPassword$1",
           avatar: profile._json.picture,
-          verifyEmail: true,
+          verifyEmail: profile._json.email_verified,
         });
 
         await newUser.save();

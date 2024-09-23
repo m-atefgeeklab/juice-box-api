@@ -1,83 +1,146 @@
 const asyncHandler = require('express-async-handler');
 const ApiError = require('./apiError');
+const ApiResponse = require('./apiResponse');
 const ApiFeatures = require('./apiFeatures');
-const { catchError } = require('../middlewares/catchErrorMiddleware')
+const { catchError } = require('../middlewares/catchErrorMiddleware');
+const { withTransaction } = require('../helpers/transactionHelper');
 
 exports.deleteOne = (Model) =>
-  catchError(asyncHandler(async (req, res, next) => {
-    const { id } = req.params;
-    const document = await Model.findByIdAndDelete(id);
+  catchError(
+    asyncHandler(async (req, res, next) => {
+      const { id } = req.params;
 
-    if (!document) {
-      return next(new ApiError(`No document for this id ${id}`, 404));
-    }
+      let document;
 
-    // Trigger "remove" event when update document
-    document.remove();
-    res.status(204).send();
-  }));
+      await withTransaction(async (session) => {
+        document = await Model.findByIdAndDelete(id).session(session);
+
+        if (!document) {
+          return next(
+            new ApiError(`No document found for this ID: ${id}`, 404),
+          );
+        }
+
+        // Trigger "remove" event if necessary
+        document.deleteOne();
+      });
+
+      const response = new ApiResponse(
+        204,
+        null,
+        `${Model.modelName} deleted successfully`,
+      );
+      res.status(response.statusCode).json(response);
+    }),
+  );
 
 exports.updateOne = (Model) =>
-  catchError(asyncHandler(async (req, res, next) => {
-    const document = await Model.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+  catchError(
+    asyncHandler(async (req, res, next) => {
+      const { id } = req.params;
+      const updateData = req.body;
 
-    if (!document) {
-      return next(
-        new ApiError(`No document for this id ${req.params.id}`, 404)
+      let document;
+
+      await withTransaction(async (session) => {
+        document = await Model.findByIdAndUpdate(id, updateData, {
+          new: true,
+          session,
+        });
+
+        if (!document) {
+          return next(
+            new ApiError(`No document found for this ID: ${id}`, 404),
+          );
+        }
+
+        // Trigger "save" event after update
+        document = await document.save({ session });
+      });
+
+      const response = new ApiResponse(
+        200,
+        document,
+        `${Model.modelName} updated successfully`,
       );
-    }
-    // Trigger "save" event when update document
-    document.save();
-    res.status(200).json({ data: document });
-  }));
+      res.status(response.statusCode).json(response);
+    }),
+  );
 
 exports.createOne = (Model) =>
-  catchError(asyncHandler(async (req, res) => {
-    const newDoc = await Model.create(req.body);
-    res.status(201).json({ data: newDoc });
-  }));
+  catchError(
+    asyncHandler(async (req, res) => {
+      let newDoc;
+
+      await withTransaction(async (session) => {
+        newDoc = await Model.create([{ ...req.body }], { session });
+      });
+
+      const response = new ApiResponse(
+        201,
+        newDoc[0],
+        `${Model.modelName} created successfully`,
+      );
+      res.status(response.statusCode).json(response);
+    }),
+  );
 
 exports.getOne = (Model, populationOpt) =>
-  catchError(asyncHandler(async (req, res, next) => {
-    const { id } = req.params;
-    // 1) Build query
-    let query = Model.findById(id);
-    if (populationOpt) {
-      query = query.populate(populationOpt);
-    }
+  catchError(
+    asyncHandler(async (req, res, next) => {
+      const { id } = req.params;
 
-    // 2) Execute query
-    const document = await query;
+      let document;
 
-    if (!document) {
-      return next(new ApiError(`No document for this id ${id}`, 404));
-    }
-    res.status(200).json({ data: document });
-  }));
+      await withTransaction(async (session) => {
+        let query = Model.findById(id).session(session);
+        if (populationOpt) {
+          query = query.populate(populationOpt);
+        }
 
-exports.getAll = (Model, modelName = '') =>
-  catchError(asyncHandler(async (req, res) => {
-    let filter = {};
-    if (req.filterObj) {
-      filter = req.filterObj;
-    }
-    // Build query
-    const documentsCounts = await Model.countDocuments();
-    const apiFeatures = new ApiFeatures(Model.find(filter), req.query)
-      .paginate(documentsCounts)
-      .filter()
-      .search(modelName)
-      .limitFields()
-      .sort();
+        document = await query;
 
-    // Execute query
-    const { mongooseQuery, paginationResult } = apiFeatures;
-    const documents = await mongooseQuery;
+        if (!document) {
+          return next(
+            new ApiError(`No document found for this ID: ${id}`, 404),
+          );
+        }
+      });
 
-    res
-      .status(200)
-      .json({ results: documents.length, paginationResult, data: documents });
-  }));
-  
+      const response = new ApiResponse(
+        200,
+        document,
+        `${Model.modelName} retrieved successfully`,
+      );
+      res.status(response.statusCode).json(response);
+    }),
+  );
+
+exports.getAll = (Model, searchableFields = []) =>
+  catchError(
+    asyncHandler(async (req, res) => {
+      let filter = {};
+      if (req.filterObj) {
+        filter = req.filterObj;
+      }
+      // Build query
+      const documentsCounts = await Model.countDocuments();
+      const apiFeatures = new ApiFeatures(Model.find(filter), req.query)
+        .paginate(documentsCounts)
+        .filter()
+        .search(searchableFields)
+        .limitFields()
+        .sort();
+
+      // Execute query
+      const { mongooseQuery, paginationResult } = apiFeatures;
+      const documents = await mongooseQuery;
+
+      const response = new ApiResponse(
+        200,
+        { results: documents.length, paginationResult, data: documents },
+        `${Model.modelName} retrieved successfully`,
+      );
+      res.status(response.statusCode).json(response);
+    }),
+  );

@@ -41,7 +41,7 @@ router.get(
 router.get(
   "/google/callback",
   passport.authenticate("google", {
-    failureRedirect: `${process.env.BASE_CLIENT_URL}`,
+    failureRedirect: `${process.env.BASE_CLIENT_URL}/login`,
   }), // Redirect to the login page on failure
   (req, res) => {
     // Successful authentication, redirect to the frontend app

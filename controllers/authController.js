@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const ApiError = require("../utils/apiError");
+const ApiResponse = require('../utils/apiResponse');
 const User = require("../models/userModel");
 const asyncHandler = require("express-async-handler");
 const { catchError } = require("../middlewares/catchErrorMiddleware");
@@ -76,46 +77,9 @@ exports.signInController = catchError(
     // 2- Generate token
     const token = createToken(user);
 
-    res.status(200).json({ message: "Login successful", token });
+    res.status(200).json(new ApiResponse({ token }));
   })
 );
-
-// @desc    Login with google
-// @route   POST /api/v1/auth/google
-// @access  Public
-exports.googleLogin = asyncHandler(async (req, res, next) => {
-  const { sub, given_name, family_name, picture, email, email_verified } = req.body;
-
-  if (!email_verified) {
-    return next(new ApiError("Email not verified", 400));
-  }
-
-  const user = await User.findOne({ email });
-
-  if (!user) {
-    const newUser = await User.create({
-      name: `${given_name} ${family_name}`,
-      email,
-      avatar: picture,
-      googleId: sub,
-      verifyEmail: email_verified,
-    });
-
-    const token = createToken(newUser);
-
-    res.status(200).json({
-      message: "User signed up successfully",
-      token,
-    });
-  }
-
-  const token = createToken(user);
-
-  res.status(200).json({
-    message: "User logged in successfully",
-    token,
-  });
-});
 
 exports.verifyEmailController = catchError(
   asyncHandler(async (req, res, next) => {
@@ -238,6 +202,44 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     status: "success",
     message: "Password reset successfully",
+    token,
+  });
+});
+
+// @desc    Login with google
+// @route   POST /api/v1/auth/google
+// @access  Public
+exports.googleLogin = asyncHandler(async (req, res, next) => {
+  const { sub, given_name, family_name, picture, email, email_verified } =
+    req.body;
+
+  if (!email_verified) {
+    return next(new ApiError("Email not verified", 400));
+  }
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    const newUser = await User.create({
+      name: `${given_name} ${family_name}`,
+      email,
+      avatar: picture,
+      googleId: sub,
+      verifyEmail: email_verified,
+    });
+
+    const token = createToken(newUser);
+
+    res.status(200).json({
+      message: "User signed up successfully",
+      token,
+    });
+  }
+
+  const token = createToken(user);
+
+  res.status(200).json({
+    message: "User logged in successfully",
     token,
   });
 });

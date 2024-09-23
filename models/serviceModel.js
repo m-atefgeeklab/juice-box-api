@@ -1,19 +1,32 @@
-const mongoose = require("mongoose");
-const ApiError = require("../utils/apiError");
+const mongoose = require('mongoose');
+const ApiError = require('../utils/apiError');
 
 const optionSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   choice: { type: String, required: true, trim: true },
   ans: { type: String, trim: true },
-  price: { type: Number, required: true, min: 0 },
-  duration: { type: Number, required: true, min: 0 },
+  data: {
+    fieldOne: { type: String, trim: true },
+    fieldTwo: { type: String, trim: true },
+    fieldThree: { type: String, trim: true },
+    fieldFour: { type: String, trim: true },
+    fieldFive: { type: String, trim: true },
+  },
+  fileUrl: { 
+    type: String,
+  },
+  s3Key: {
+    type: String,
+  },
+  price: { type: Number, min: 0 },
+  duration: { type: Number, min: 0 },
 });
 
 const serviceSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
       index: true, // Index for quick user-based lookups
     },
@@ -26,8 +39,8 @@ const serviceSchema = new mongoose.Schema(
     options: [optionSchema],
     status: {
       type: String,
-      enum: ["in-progress", "purchased", "completed", "call-sales"],
-      default: "in-progress",
+      enum: ['in-progress', 'purchased', 'completed', 'call-sales'],
+      default: 'in-progress',
       index: true, // Index service status for quick filtering
     },
     totalPrice: {
@@ -46,21 +59,21 @@ const serviceSchema = new mongoose.Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ["pending", "paid", "failed"],
-      default: "pending",
+      enum: ['pending', 'paid', 'failed'],
+      default: 'pending',
     },
     stripePaymentId: {
       type: String,
-      index: true,  // Index for quick lookups
+      index: true, // Index for quick lookups
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Middleware to calculate total price and duration
-serviceSchema.pre("save", async function (next) {
+serviceSchema.pre('save', async function (next) {
   try {
     let totalPrice = 0;
     let totalDuration = 0;
@@ -75,10 +88,10 @@ serviceSchema.pre("save", async function (next) {
 
     next();
   } catch (error) {
-    next(new ApiError("Error calculating totals", 500));
+    next(new ApiError('Error calculating totals', 500));
   }
 });
 
-const Service = mongoose.model("Service", serviceSchema);
+const Service = mongoose.model('Service', serviceSchema);
 
 module.exports = Service;

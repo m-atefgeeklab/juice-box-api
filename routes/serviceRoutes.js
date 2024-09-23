@@ -1,13 +1,15 @@
 const express = require("express");
 const {
   purchaseService,
-  inProgressService,
+  initializeService,
   continueService,
   cancelService,
   linkCreditCard,
   validateDomain,
   callSales,
 } = require("../controllers/servicesController.js");
+const uploadMediaWithFile = require('../services/fileUploadingService');
+const upload = require('../middlewares/uploadMiddleware');
 
 const authService = require("../services/authService");
 
@@ -17,8 +19,8 @@ router.use(authService.protect);
 
 router.use(authService.allowedTo("user"));
 
-router.post("/in-progress", inProgressService);
-router.post("/continue", continueService);
+router.post("/initialize-service", upload, initializeService);
+router.post("/:id/follow-up-service", continueService);
 router.post("/cancel", cancelService);
 router.post("/call-sales", callSales);
 router.post('/link-card', linkCreditCard);

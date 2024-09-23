@@ -4,13 +4,9 @@ const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
 const cors = require("cors");
-const cloudinary = require("cloudinary").v2;
 const compression = require("compression");
-// const session = require("express-session");
-// const MongoStore = require("connect-mongo");
 const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
-// const cookieParser = require("cookie-parser");
 const passport = require("passport");
 const helmet = require("helmet");
 const hpp = require("hpp");
@@ -19,6 +15,7 @@ dotenv.config({ path: "./config/.env" });
 const mongoSanitize = require("express-mongo-sanitize");
 const { stripeWebhook } = require("./services/paymentService");
 const ApiError = require("./utils/apiError");
+const User = require("./models/userModel");
 const globalError = require("./middlewares/errorMiddleware");
 const dbConnection = require("./config/database");
 
@@ -27,12 +24,6 @@ require("./config/passport");
 
 // Routes
 const mountRoutes = require("./routes");
-
-cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.CLOUD_API_KEY,
-  api_secret: process.env.CLOUD_API_SECRET,
-});
 
 // Connect with db
 dbConnection();
@@ -43,14 +34,13 @@ const app = express();
 // Cors
 app.use(cors(
   {
-    origin: process.env.BASE_CLIENT_URL,
+    origin: process.env.BASE_CLIENT_URL || "http://localhost:3000",
     credentials: true,
+    methods: ["GET", "HEAD", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   }
 ));
 app.options('*', cors());
-
-// Serve static files
-app.use(express.static(path.join(__dirname, "public")));
 
 // Compress all responses
 app.use(compression());
@@ -64,6 +54,9 @@ app.post(
 
 app.use(bodyParser.json());
 // app.use(express.json({ limit: "20kb" }));
+
+// Serve static files
+app.use(express.static(path.join(__dirname, "uploads")));
 
 app.use(
   cookieSession({
@@ -109,8 +102,31 @@ app.all("*", (req, res, next) => {
 app.use(globalError);
 
 const PORT = process.env.PORT || 8000;
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, async () => {
   console.log(`Server is running on port: ${PORT}`);
+
+  // Check if there is any admin user
+  const adminExists = await User.findOne({ role: "admin" });
+
+  if (!adminExists) {
+    try {
+      // Create an admin user
+      const adminUser = new User({
+        name: "Admin",
+        email: process.env.ADMIN_EMAIL, 
+        password: process.env.ADMIN_PASSWORD,
+        role: "admin",
+        verifyEmail: true,
+      });
+
+      await adminUser.save();
+      console.log("Admin user created successfully.");
+    } catch (error) {
+      console.error("Error creating admin user:", error);
+    }
+  } else {
+    console.log("Admin user already exists.");
+  }
 });
 
 // Handle rejection outside express
